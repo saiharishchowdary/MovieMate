@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="wave"></div>
+<div class="wave"></div>
+<div class="wave"></div>
+
+<div class="container mt-5">
+  <h2 class="text-white mb-4">Movie Search</h2>
+
+  <form method="POST" action="{{ url_for('movie.search') }}" onsubmit="showSpinner()">
+    {{ form.hidden_tag() }}
+    <div class="input-group mb-4">
+      {{ form.query(class="form-control", placeholder="Search for movies...") }}
+      <button type="submit" class="btn btn-light">{{ form.submit.label.text }}</button>
+    </div>
+  </form>
+
+  <div id="spinner" style="display: none;" class="text-center my-4">
+    <div class="spinner-border text-light" role="status"></div>
+    <p class="text-white mt-2">Searching movies...</p>
+  </div>
+
+  {% if movies %}
+  <div class="card shadow mb-5">
+    <div class="card-body">
+      <h4 class="card-title">🎬 TMDB Search Results</h4>
+      <div class="d-flex flex-nowrap overflow-auto mt-3 pb-2">
+        {% for movie in movies %}
+        <div class="me-3" style="min-width: 200px;">
+          <div class="card h-100">
+            <a href="{{ url_for('movie.movie_detail', movie_id=movie['id']) }}">
+              <img src="{{ movie.poster_path and 'https://image.tmdb.org/t/p/w500' ~ movie.poster_path or url_for('static', filename='default-poster.png') }}"
+                   class="card-img-top" alt="{{ movie.title }} poster">
+            </a>
+            <div class="card-body">
+              <h6 class="card-title">{{ movie.title }}</h6>
+              <p class="card-text small">{{ movie.overview[:100] }}{% if movie.overview|length > 100 %}...{% endif %}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if recommended_movies %}
+  <div class="card shadow mb-5">
+    <div class="card-body">
+      <h4 class="card-title">🔁 Recommended Based on Your Search</h4>
+      <div class="d-flex flex-nowrap overflow-auto mt-3 pb-2">
+        {% for rec in recommended_movies %}
+        <div class="me-3" style="min-width: 200px;">
+          <div class="card h-100">
+            {% if rec.id %}
+              <a href="{{ url_for('movie.movie_detail', movie_id=rec['id']) }}">
+                <img src="{{ rec.poster_path and 'https://image.tmdb.org/t/p/w500' ~ rec.poster_path or url_for('static', filename='default-poster.png') }}"
+                     class="card-img-top" alt="{{ rec.title }} poster">
+              </a>
+            {% else %}
+              <img src="{{ rec.poster_path and 'https://image.tmdb.org/t/p/w500' ~ rec.poster_path or url_for('static', filename='default-poster.png') }}"
+                   class="card-img-top" alt="{{ rec.title }} poster">
+            {% endif %}
+            <div class="card-body">
+              <h6 class="card-title">{{ rec.title }}</h6>
+              <p class="card-text small">{{ rec.overview[:100] }}{% if rec.overview|length > 100 %}...{% endif %}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  function showSpinner() {
+    document.getElementById("spinner").style.display = "block";
+  }
+</script>
+{% endblock %}
